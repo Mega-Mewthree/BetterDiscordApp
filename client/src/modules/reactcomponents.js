@@ -508,14 +508,23 @@ export class ReactAutoPatcher {
 
         const reflect = Reflection(selector);
         const stateNode = reflect.getComponentStateNode(this.UploadArea);
-        const callback = function(e) {
-            if (!e.dataTransfer.files.length || !e.dataTransfer.files[0].name.endsWith('.bd')) return;
+
+        const callback = function (e) {
+            const { files } = e.dataTransfer;
+            if (!files.length || !files[0].name.endsWith('.bd')) return;
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
             stateNode.clearDragging();
-            Modals.confirm("Function not ready", `You tried to install "${e.dataTransfer.files[0].path}", but installing .bd files isn't ready yet.`)
-            // Possibly something like Events.emit('install-file', e.dataTransfer.files[0]);
+            (async () => {
+                try {
+                    await Modals.confirm("Function not ready", `You tried to install "${files[0].path}", but installing .bd files isn't ready yet.`).promise;
+                    // Possibly something like Events.emit('install-file', files[0]);
+                } catch (err) {
+                    // Pass files to Discord upload prompt
+                    stateNode.promptToUpload(files, DiscordApi.currentChannel.id);
+                }
+            })();
         };
 
         // Remove their handler, add ours, then readd theirs to give ours priority to stop theirs when we get a .bd file.
