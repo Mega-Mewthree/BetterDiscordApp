@@ -262,7 +262,7 @@ export default new class EmoteModule extends BuiltinModule {
         if (!content) return orig(...args);
 
         const emoteAsImage = Settings.getSetting('emotes', 'default', 'emoteasimage').value &&
-            (DiscordApi.currentChannel.type === 'DM' || DiscordApi.currentChannel.checkPermissions(DiscordApi.modules.DiscordPermissions.ATTACH_FILES));
+            (DiscordApi.currentChannel.type === 'DM' || DiscordApi.currentChannel.type === 'GROUP_DM' || DiscordApi.currentChannel.checkPermissions(DiscordApi.modules.DiscordPermissions.ATTACH_FILES));
 
         if (!emoteAsImage || content.split(' ').length > 1) {
             args[1].content = args[1].content.split(' ').map(word => {
